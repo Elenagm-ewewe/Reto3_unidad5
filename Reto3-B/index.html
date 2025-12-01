@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reto 3 B</title>
+  </head>
+  <body>
+    <form novalidate id="formulario">
+      <label>Introduce el tipo de dato del personaje</label>
+      <select name="tipodato" id="tipodato">
+        <option value="name">Nombre</option>
+        <option value="gender">Género</option>
+        <option value="skin_color">Color de piel</option>
+        <option value="hair_color">Color del cabello</option>
+        <option value="height">Altura</option>
+        <option value="eye_color">Color de los ojos</option>
+        <option value="mass">Peso</option>
+        <option value="birth_year">Año de nacimiento</option>
+        <option value="homeworld">Planeta natal</option>
+        <option value="vehicles">Vehículos</option>
+        <option value="starships">Naves espaciales</option>
+        <option value="films">Películas</option>
+      </select>
+      <label>Introduce el id del tipo selecionado</label>
+      <input type="text" id="iden" />
+      <button type="submit">Buscar personaje</button>
+    </form>
+
+    <p id="noencontrado"></p>
+
+    <div id="tarjeta"></div>
+
+    <script src="Reto3B.js"></script>
+  </body>
+</html>
