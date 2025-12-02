@@ -1,107 +1,65 @@
 // Llamar a la api
-const url = "https://swapi.dev/api/";
-const endpointPeople = "people/";
-const endpointFilms = "films/";
-const endpointPlanets = "planets/";
-const endpointStarships = "Starships/";
-const endpointSpecies = "Species/";
+const url = "https://www.swapi.dev/api/";
 
 // DOM
 const formulario = document.getElementById("formulario");
-const tipodato = document.getElementById("tipodato");
-const iden = document.getElementById("iden");
+const datoSelect = document.getElementById("dato");
+const idenInput = document.getElementById("iden");
 const noencontrado = document.getElementById("noencontrado");
-let personaje = null;
 
 // Eventos
-formulario.addEventListener("submit", obtenerPersonaje);
+formulario.addEventListener("submit", obtenerDato);
 
-async function obtenerPersonaje(e) {
+async function obtenerDato(e) {
   e.preventDefault();
-  const respuesta = await fetch(`${url}${endpointPeople}${iden.value}/`);
-  personaje = await respuesta.json();
 
-  let tipodatoValue = tipodato.value;
-  let idenValue = iden.value;
+  // VAriables
+  const resourceType = datoSelect.value;
+  const resourceId = idenInput.value.trim();
+  const tipodatoValue = datoSelect.value;
+  const idenValue = idenInput.value;
+
+  // Construcción de la URL:
+  const resourceUrl = resourceId
+    ? `${url}${resourceType}/${resourceId}`
+    : `${url}${resourceType}/`;
+
+  // Limpiar resultados anteriores
+  noencontrado.textContent = "";
+  tarjetaDiv.innerHTML = "";
+
+  // Llamado a la API
   try {
-    if (personaje.result) {
-      const tarjeta = document.getElementById("tarjeta");
-      const personajeDiv = document.createElement("div");
-      personajeDiv.id = "personaje";
-      switch (tipodatoValue) {
-        case "name":
-          obtenerPersonajeName(idenValue);
-        
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Id: </strong><span>${personaje.result.properties._id}</span></div>
-        `;
-          break;
-        case "gender":
-          obtenerPersonajeGender(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Genero: </strong><span>${personaje.result.properties.gender}</span></div>
-        `;
-          break;
-        case "skin_color":
-          obtenerPersonajeSkinColor(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Color de piel: </strong><span>${personaje.result.properties.skin_color}</span></div>
-        `;
-          break;
-        case "hair_color":
-          obtenerPersonajeHairColor(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Color de cabello: </strong><span>${personaje.result.properties.hair_color}</span></div>
-        `;
-          break;
-        case "height":
-          obtenerPersonajeHeight(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Altura: </strong><span>${personaje.result.properties.height}</span></div>
-        `;
-          break;
-        case "eye_color":
-          obtenerPersonajeEyeColor(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Color de los ojos: </strong><span>${personaje.result.properties.eye_color}</span></div>
-        `;
-          break;
-        case "mass":
-          obtenerPersonajeMass(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Peso: </strong><span>${personaje.result.properties.mass}</span></div>
-        `;
-          break;
-        case "birth_year":
-          obtenerPersonajeBirthYear(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Año de nacimiento: </strong><span>${personaje.result.properties.birth_year}</span></div>
-        `;
-          break;
-        case "homeworld":
-          obtenerPersonajeHomeworld(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Planeta natal: </strong><span>${personaje.result.properties.homeworld}</span></div>
-        `;
-          break;
-        case "vehicles":
-          obtenerPersonajeVehicles(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Vehículos: </strong><span>${personaje.result.properties.vehicles}</span></div>
-        `;
-          break;
-        case "starships":
-          obtenerPersonajeStarships(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Naves: </strong><span>${personaje.result.properties.starships}</span></div>
-        `;
-          break;
-        case "films":
-          obtenerPersonajeFilms(idenValue);
-          tarjeta.innerHTML = `<div class="tarjeta"><strong>Películas: </strong><span>${personaje.result.properties.films}</span></div>
-        `;
-          break;
-      }
-
-      personajeDiv.appendChild(tarjeta);
-      document.body.appendChild(personajeDiv);
-    } else {
-      noencontrado.textContent = "El personaje no fue encontrado";
+    const response = await fetch(resourceUrl);
+    // Manejo de Errores
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}. Recurso no encontrado.`);
     }
-    tipodato.value = "";
-    iden.value = "";
-    noencontrado.textContent = "";
-  } catch {
-    noencontrado.textContent =
-      "Respuestas no exitosas de la API o problemas de conexión.";
+    // Obtener el cuerpo de la respuesta (JSON)
+    const data = await response.json();
+
+    // Procesamiento de la Data
+    procesarResultado(data, resourceId, resourceType);
+  } catch (error) {
+    noencontrado.textContent = `\Error: ${error.message || 'Problema de conexión con la API.'}`;
   }
+}
+
+function procesarResultado(data, resourceId, resourceType) {
+  const tarjetaDiv = document.getElementById("tarjeta");
+  tarjetaDiv.innerHTML = "";
+
+  if (data.message === "not found" || !data.result) {
+    noencontrado.textContent = `Recurso con ID ${resourceId} no encontrado.`;
+    return;
+  }
+
+  // Inyección limpia en el DOM
+  tarjetaDiv.innerHTML = `
+      <div class="card-item"><strong>${tipodatoValue}:</strong> <span>${idenValue}</span></div>
+      <div class="card-item"><strong>Nombre:</strong> <span>${data.result.properties.name}</span></div>
+      <div class="card-item"><strong>Altura:</strong> <span>${data.result.properties.height} cm</span></div>
+      <div class="card-item"><strong>Masa:</strong> <span>${data.result.properties.mass} kg</span></div>
+      <div class="card-item"><strong>Género:</strong> <span>${data.result.properties.gender}</span></div>
+  `;
 }
